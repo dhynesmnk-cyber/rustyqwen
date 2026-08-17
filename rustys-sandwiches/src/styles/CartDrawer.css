@@ -1,0 +1,218 @@
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(42, 18, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cart-drawer {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--colour-cart-background);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 2px solid var(--colour-border);
+  background-color: var(--colour-action-strong);
+  color: var(--colour-text-inverse);
+}
+
+.cart-header h2 {
+  font-size: var(--font-size-section-heading);
+  font-weight: var(--font-weight-bold);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: var(--colour-text-inverse);
+  cursor: pointer;
+  padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  opacity: 0.8;
+}
+
+.cart-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.cart-empty {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--colour-text-primary);
+  font-size: var(--font-size-body);
+}
+
+.cart-item {
+  background-color: var(--colour-card-background);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.cart-item-name {
+  font-size: var(--font-size-menu-title);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-1);
+}
+
+.cart-item-modifiers {
+  margin-bottom: var(--space-2);
+}
+
+.modifier-item {
+  font-size: var(--font-size-small);
+  color: var(--colour-text-primary);
+  opacity: 0.9;
+}
+
+.cart-item-price {
+  font-size: var(--font-size-price);
+  font-weight: var(--font-weight-bold);
+  color: var(--colour-action-strong);
+}
+
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: var(--colour-page-background);
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: var(--colour-action);
+  color: var(--colour-text-primary);
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover {
+  background-color: var(--colour-action-strong);
+  color: var(--colour-text-inverse);
+}
+
+.qty-value {
+  min-width: 24px;
+  text-align: center;
+  font-weight: var(--font-weight-bold);
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--colour-text-primary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: var(--space-1);
+}
+
+.remove-btn:hover {
+  color: var(--colour-action-strong);
+}
+
+.cart-footer {
+  padding: var(--space-4);
+  border-top: 2px solid var(--colour-border);
+  background-color: var(--colour-section-background);
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-section-heading);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--colour-border);
+}
+
+.total-amount {
+  color: var(--colour-action-strong);
+}
+
+.cart-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.checkout-btn {
+  flex: 2;
+}
+
+.clear-cart {
+  flex: 1;
+}
+
+.payment-note {
+  font-size: var(--font-size-small);
+  color: var(--colour-text-primary);
+  text-align: center;
+  opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+  .cart-drawer {
+    max-width: 100%;
+  }
+
+  .cart-actions {
+    flex-direction: column;
+  }
+
+  .checkout-btn,
+  .clear-cart {
+    flex: 1;
+  }
+}
