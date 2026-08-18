@@ -6,19 +6,29 @@ const defaultContent = {
   title: "rusty's sandwich parlour",
   tagline: "where every bite tells a story of craftsmanship and care",
   preorderEmail: "orders@rustyssandwichparlour.com",
-  galleryImages: [
-    'https://images.unsplash.com/photo-1553909489-cd47e3b4430f?w=800&q=80',
+  heroImage: 'https://images.unsplash.com/photo-1553909489-cd47e3b4430f?w=1600&q=80',
+  supportImages: [
     'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80',
-    'https://images.unsplash.com/photo-1509721437493-41fa6e2fb819?w=800&q=80'
+    'https://images.unsplash.com/photo-1509721437493-41fa6e2fb819?w=800&q=80',
+    'https://images.unsplash.com/photo-1554433607-66b5efe9d304?w=800&q=80'
+  ],
+  menuItems: [
+    { id: 1, name: 'The Rusty Classic', description: 'Roast beef, aged cheddar, horseradish cream', price: 14 },
+    { id: 2, name: 'Turkey Club Deluxe', description: 'Smoked turkey, bacon, avocado, lettuce, tomato', price: 13 },
+    { id: 3, name: 'Italian Stallion', description: 'Salami, capicola, provolone, giardiniera, hot peppers', price: 15 },
+    { id: 4, name: 'Veggie Supreme', description: 'Hummus, roasted vegetables, sprouts, swiss cheese', price: 12 },
+    { id: 5, name: 'BBQ Pulled Pork', description: 'Slow-cooked pork, coleslaw, pickles, BBQ sauce', price: 14 },
+    { id: 6, name: 'Grilled Cheese Melt', description: 'Three cheese blend, caramelized onions, sourdough', price: 11 }
   ]
 }
 
 function App() {
   const [content, setContent] = useState(defaultContent)
   const [isAdminOpen, setIsAdminOpen] = useState(false)
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
   const [adminData, setAdminData] = useState({ ...defaultContent })
-
+  const [orderItems, setOrderItems] = useState([])
+  
   // Load saved content from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('rustys-content')
@@ -40,21 +50,29 @@ function App() {
   }
 
   const handlePreorderClick = () => {
-    setIsEmailModalOpen(true)
+    setOrderItems([])
+    setIsOrderModalOpen(true)
+  }
+
+  const toggleOrderItem = (item) => {
+    setOrderItems(prev => {
+      const exists = prev.find(i => i.id === item.id)
+      if (exists) {
+        return prev.filter(i => i.id !== item.id)
+      }
+      return [...prev, item]
+    })
   }
 
   const generateEmailBody = () => {
-    return `Subject: Pre-Order Request
-
-Dear Rusty's Team,
-
-I would like to place a pre-order for pickup.
-
-Please contact me to confirm availability and timing.
-
-Best regards,
-[Your Name]
-[Your Phone Number]`
+    if (orderItems.length === 0) {
+      return `Subject: Pre-Order Request\n\nDear Rusty's Team,\n\nI would like to place a pre-order for pickup.\n\nPlease contact me to confirm availability and timing.\n\nBest regards,\n[Your Name]\n[Your Phone Number]`
+    }
+    
+    const itemsList = orderItems.map(item => `- ${item.name} - $${item.price}`).join('\n')
+    const total = orderItems.reduce((sum, item) => sum + item.price, 0)
+    
+    return `Subject: Pre-Order Request\n\nDear Rusty's Team,\n\nI would like to place a pre-order for pickup:\n\n${itemsList}\n\nTotal: $${total}\n\nPlease contact me to confirm availability and timing.\n\nBest regards,\n[Your Name]\n[Your Phone Number]`
   }
 
   const mailtoLink = `mailto:${content.preorderEmail}?subject=Pre-Order Request&body=${encodeURIComponent(generateEmailBody())}`
@@ -65,16 +83,23 @@ Best regards,
       <nav className="nav">
         <div className="nav-links">
           <button className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>home</button>
-          <button className="nav-link" onClick={() => document.querySelector('.gallery')?.scrollIntoView({ behavior: 'smooth' })}>gallery</button>
+          <button className="nav-link" onClick={() => document.querySelector('.menu-section')?.scrollIntoView({ behavior: 'smooth' })}>menu</button>
+          <button className="nav-link" onClick={() => document.querySelector('.support-gallery')?.scrollIntoView({ behavior: 'smooth' })}>gallery</button>
         </div>
       </nav>
 
-      {/* Hero Section with Typewriter Animation */}
+      {/* Hero Section with Image */}
       <section className="hero">
-        <div className="typewriter-container">
-          <div className="typewriter-title">{content.title}</div>
+        <div className="hero-image-container">
+          <img src={content.heroImage} alt="Rusty's Sandwich Parlour" className="hero-image" />
+          <div className="hero-overlay"></div>
         </div>
-        <p className="tagline">{content.tagline}</p>
+        <div className="hero-content">
+          <div className="typewriter-container">
+            <div className="typewriter-title">{content.title}</div>
+          </div>
+          <p className="tagline">{content.tagline}</p>
+        </div>
       </section>
 
       {/* Hero Navigation Links */}
@@ -85,7 +110,7 @@ Best regards,
         </div>
         <p className="hero-nav-subtitle">send us an email order</p>
 
-        <div className="hero-nav-item" onClick={() => document.querySelector('.gallery')?.scrollIntoView({ behavior: 'smooth' })}>
+        <div className="hero-nav-item" onClick={() => document.querySelector('.support-gallery')?.scrollIntoView({ behavior: 'smooth' })}>
           <span className="hero-nav-number">02</span>
           <span className="hero-nav-text">catering</span>
         </div>
@@ -98,16 +123,49 @@ Best regards,
         <p className="hero-nav-subtitle">no, you are!</p>
       </section>
 
-      {/* Gallery Section */}
-      <section className="gallery">
-        <div className="gallery-grid">
-          {content.galleryImages.map((src, index) => (
-            <div key={index} className="gallery-item">
-              <img src={src} alt={`Gallery image ${index + 1}`} className="gallery-image" />
+      {/* Menu Section for Ordering */}
+      <section className="menu-section">
+        <h2 className="section-title">select your order</h2>
+        <div className="menu-grid">
+          {content.menuItems.map((item) => {
+            const isSelected = orderItems.find(i => i.id === item.id)
+            return (
+              <div key={item.id} className="menu-item" onClick={() => toggleOrderItem(item)}>
+                <div className="menu-item-header">
+                  <span className="menu-item-name">{item.name}</span>
+                  <span className="menu-item-price">${item.price}</span>
+                </div>
+                <p className="menu-item-description">{item.description}</p>
+                <button className={`add-btn ${isSelected ? 'selected' : ''}`}>
+                  {isSelected ? '✓ added' : '+ add'}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Support Gallery Section */}
+      <section className="support-gallery">
+        <h2 className="section-title">our craft</h2>
+        <div className="support-grid">
+          {content.supportImages.map((src, index) => (
+            <div key={index} className="support-item">
+              <img src={src} alt={`Support image ${index + 1}`} className="support-image" />
             </div>
           ))}
         </div>
       </section>
+
+      {/* Footer with Logo */}
+      <footer className="footer">
+        <img 
+          src="https://1190d7984a68fba74550.cdn6.editmysite.com/uploads/b/1190d7984a68fba7455015172f28de93a092ebc7cffd9fe4d48361cca7d9268c/RUSTY%27S%20SANDWICH%20PARLOUR%20-%20Primary%20Logo-01%20%282%29_1706586218.jpg?width=2400&optimize=medium" 
+          alt="Rusty's Sandwich Parlour Logo" 
+          className="footer-logo"
+        />
+        <p className="footer-text">© 2024 rusty's sandwich parlour</p>
+      </footer>
 
       {/* Admin Panel Button */}
       <div className="admin-panel">
@@ -160,10 +218,20 @@ Best regards,
               onChange={(e) => setAdminData({...adminData, preorderEmail: e.target.value})}
             />
           </div>
+
+          <div className="admin-form-group">
+            <label className="admin-label">hero image url</label>
+            <input 
+              type="text" 
+              className="admin-input"
+              value={adminData.heroImage}
+              onChange={(e) => setAdminData({...adminData, heroImage: e.target.value})}
+            />
+          </div>
         </div>
 
         <div className="admin-section">
-          <h3 className="admin-section-title">gallery images</h3>
+          <h3 className="admin-section-title">support gallery images</h3>
           
           {[0, 1, 2].map((index) => (
             <div key={index} className="admin-form-group">
@@ -171,13 +239,60 @@ Best regards,
               <input 
                 type="text" 
                 className="admin-input"
-                value={adminData.galleryImages[index] || ''}
+                value={adminData.supportImages[index] || ''}
                 onChange={(e) => {
-                  const newImages = [...adminData.galleryImages]
+                  const newImages = [...adminData.supportImages]
                   newImages[index] = e.target.value
-                  setAdminData({...adminData, galleryImages: newImages})
+                  setAdminData({...adminData, supportImages: newImages})
                 }}
               />
+            </div>
+          ))}
+        </div>
+
+        <div className="admin-section">
+          <h3 className="admin-section-title">menu items</h3>
+          
+          {adminData.menuItems.map((item, index) => (
+            <div key={item.id} className="admin-menu-item">
+              <div className="admin-form-group">
+                <label className="admin-label">item {index + 1} name</label>
+                <input 
+                  type="text" 
+                  className="admin-input"
+                  value={item.name}
+                  onChange={(e) => {
+                    const newItems = [...adminData.menuItems]
+                    newItems[index].name = e.target.value
+                    setAdminData({...adminData, menuItems: newItems})
+                  }}
+                />
+              </div>
+              <div className="admin-form-group">
+                <label className="admin-label">description</label>
+                <textarea 
+                  className="admin-textarea"
+                  value={item.description}
+                  onChange={(e) => {
+                    const newItems = [...adminData.menuItems]
+                    newItems[index].description = e.target.value
+                    setAdminData({...adminData, menuItems: newItems})
+                  }}
+                />
+              </div>
+              <div className="admin-form-group">
+                <label className="admin-label">price</label>
+                <input 
+                  type="number" 
+                  className="admin-input"
+                  value={item.price}
+                  onChange={(e) => {
+                    const newItems = [...adminData.menuItems]
+                    newItems[index].price = parseInt(e.target.value) || 0
+                    setAdminData({...adminData, menuItems: newItems})
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -187,20 +302,41 @@ Best regards,
         </button>
       </div>
 
-      {/* Email Order Modal */}
-      <div className={`email-modal ${isEmailModalOpen ? 'active' : ''}`}>
-        <div className="email-content">
+      {/* Order Modal */}
+      <div className={`order-modal ${isOrderModalOpen ? 'active' : ''}`}>
+        <div className="order-content">
           <button 
             className="admin-close" 
             style={{position: 'absolute', top: '40px', right: '40px'}}
-            onClick={() => setIsEmailModalOpen(false)}
+            onClick={() => setIsOrderModalOpen(false)}
           >
             ×
           </button>
-          <h2 className="email-title">Pre-Order via Email</h2>
-          <p className="email-body">{generateEmailBody()}</p>
-          <a href={mailtoLink} className="email-link">
-            open email client
+          <h2 className="order-title">build your order</h2>
+          <p className="order-subtitle">click items to add them to your email</p>
+          
+          <div className="order-items-list">
+            {orderItems.length === 0 ? (
+              <p className="order-empty">no items selected yet</p>
+            ) : (
+              orderItems.map(item => (
+                <div key={item.id} className="order-selected-item">
+                  <span className="order-item-name">{item.name}</span>
+                  <span className="order-item-price">${item.price}</span>
+                </div>
+              ))
+            )}
+          </div>
+          
+          {orderItems.length > 0 && (
+            <div className="order-total">
+              <span>total:</span>
+              <span>${orderItems.reduce((sum, item) => sum + item.price, 0)}</span>
+            </div>
+          )}
+          
+          <a href={mailtoLink} className="order-link">
+            send order via email →
           </a>
         </div>
       </div>
