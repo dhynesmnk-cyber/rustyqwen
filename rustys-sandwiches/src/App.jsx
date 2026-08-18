@@ -97,75 +97,38 @@ function App() {
 
   return (
     <>
-      {/* Navigation */}
-      <nav className="nav">
-        <div className="nav-links">
-          <button className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>home</button>
-          <button className="nav-link" onClick={() => document.querySelector('.menu-section')?.scrollIntoView({ behavior: 'smooth' })}>menu</button>
-          <button className="nav-link" onClick={() => document.querySelector('.support-gallery')?.scrollIntoView({ behavior: 'smooth' })}>gallery</button>
-        </div>
-      </nav>
-
       {/* Hero Section with Image */}
       <section className="hero">
+        <div className="typewriter-title">{content.title}</div>
+        <p className="tagline">{content.tagline}</p>
+        
         <div className="hero-image-container">
           <img src={content.heroImage} alt="Rusty's Sandwich Parlour" className="hero-image" />
-          <div className="hero-overlay"></div>
         </div>
-        <div className="hero-content">
-          <div className="typewriter-container">
-            <div className="typewriter-title">{content.title}</div>
+
+        <nav className="hero-nav">
+          <div className="hero-nav-item" onClick={handlePreorderClick}>
+            <span className="hero-nav-number">01</span>
+            <span className="hero-nav-text">preorder</span>
           </div>
-          <p className="tagline">{content.tagline}</p>
-        </div>
-      </section>
+          <p className="hero-nav-subtitle">send us an email order</p>
 
-      {/* Hero Navigation Links */}
-      <section className="hero-nav">
-        <div className="hero-nav-item" onClick={handlePreorderClick}>
-          <span className="hero-nav-number">01</span>
-          <span className="hero-nav-text">preorder</span>
-        </div>
-        <p className="hero-nav-subtitle">send us an email order</p>
+          <div className="hero-nav-item">
+            <span className="hero-nav-number">02</span>
+            <span className="hero-nav-text">catering</span>
+          </div>
+          <p className="hero-nav-subtitle">coz you got friends</p>
 
-        <div className="hero-nav-item" onClick={() => document.querySelector('.support-gallery')?.scrollIntoView({ behavior: 'smooth' })}>
-          <span className="hero-nav-number">02</span>
-          <span className="hero-nav-text">catering</span>
-        </div>
-        <p className="hero-nav-subtitle">coz you got friends</p>
-
-        <div className="hero-nav-item">
-          <span className="hero-nav-number">03</span>
-          <span className="hero-nav-text">specials</span>
-        </div>
-        <p className="hero-nav-subtitle">no, you are!</p>
-      </section>
-
-      {/* Menu Section for Ordering */}
-      <section className="menu-section">
-        <h2 className="section-title">select your order</h2>
-        <div className="menu-grid">
-          {content.menuItems.map((item) => {
-            const isSelected = orderItems.find(i => i.id === item.id)
-            return (
-              <div key={item.id} className="menu-item" onClick={() => toggleOrderItem(item)}>
-                <div className="menu-item-header">
-                  <span className="menu-item-name">{item.name}</span>
-                  <span className="menu-item-price">${item.price}</span>
-                </div>
-                <p className="menu-item-description">{item.description}</p>
-                <button className={`add-btn ${isSelected ? 'selected' : ''}`}>
-                  {isSelected ? '✓ added' : '+ add'}
-                </button>
-              </div>
-            )
-          })}
-        </div>
+          <div className="hero-nav-item">
+            <span className="hero-nav-number">03</span>
+            <span className="hero-nav-text">specials</span>
+          </div>
+          <p className="hero-nav-subtitle">no, you are!</p>
+        </nav>
       </section>
 
       {/* Support Gallery Section */}
       <section className="support-gallery">
-        <h2 className="section-title">our craft</h2>
         <div className="support-grid">
           {content.supportImages.map((src, index) => (
             <div key={index} className="support-item">
@@ -182,7 +145,7 @@ function App() {
           alt="Rusty's Sandwich Parlour Logo" 
           className="footer-logo"
         />
-        <p className="footer-text">© 2024 rusty's sandwich parlour</p>
+        <p className="footer-text">{content.preorderEmail}</p>
       </footer>
 
       {/* Admin Panel Button */}
@@ -201,7 +164,7 @@ function App() {
       {/* Admin Modal */}
       <div className={`admin-modal ${isAdminOpen ? 'active' : ''}`}>
         <div className="admin-header">
-          <span className="admin-title">update content</span>
+          <span className="admin-title">site settings</span>
           <button className="admin-close" onClick={() => setIsAdminOpen(false)}>×</button>
         </div>
 
@@ -248,7 +211,7 @@ function App() {
               />
             </div>
             {adminData.heroImage && (
-              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px', borderRadius: '8px'}} />
+              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px', borderRadius: '4px'}} />
             )}
           </div>
         </div>
@@ -265,7 +228,7 @@ function App() {
                 onChange={(e) => handleImageUpload(e, 'support', index)}
               />
               {adminData.supportImages[index] && (
-                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px', borderRadius: '8px'}} />
+                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px', borderRadius: '4px'}} />
               )}
             </div>
           ))}
@@ -328,7 +291,7 @@ function App() {
         <div className="order-content">
           <button 
             className="admin-close" 
-            style={{position: 'absolute', top: '40px', right: '40px'}}
+            style={{position: 'absolute', top: '1rem', right: '1rem'}}
             onClick={() => setIsOrderModalOpen(false)}
           >
             ×
@@ -337,16 +300,20 @@ function App() {
           <p className="order-subtitle">click items to add them to your email</p>
           
           <div className="order-items-list">
-            {orderItems.length === 0 ? (
-              <p className="order-empty">no items selected yet</p>
-            ) : (
-              orderItems.map(item => (
-                <div key={item.id} className="order-selected-item">
-                  <span className="order-item-name">{item.name}</span>
-                  <span className="order-item-price">${item.price}</span>
+            {content.menuItems.map((item) => {
+              const isSelected = orderItems.find(i => i.id === item.id)
+              return (
+                <div 
+                  key={item.id} 
+                  className="order-selected-item"
+                  onClick={() => toggleOrderItem(item)}
+                  style={{cursor: 'pointer'}}
+                >
+                  <span className="order-item-name">{item.name} - ${item.price}</span>
+                  <span className="order-item-price">{isSelected ? '✓' : '+'}</span>
                 </div>
-              ))
-            )}
+              )
+            })}
           </div>
           
           {orderItems.length > 0 && (
