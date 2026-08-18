@@ -1,28 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import LoyaltySignup from './components/LoyaltySignup'
 import CateringModal from './components/CateringModal'
+import { defaultContent, loadContent, saveContent } from './lib/siteContent'
+import { resizeImageFile } from './lib/imageResize'
 import './index.css'
 
-// Default content - can be updated via admin panel
-const defaultContent = {
-  title: "rusty's sandwich parlour",
-  tagline: "where every bite tells a story of craftsmanship and care",
-  preorderEmail: "orders@rustyssandwichparlour.com",
-  heroImage: 'https://images.unsplash.com/photo-1553909489-cd47e3b4430f?w=1600&q=80',
-  supportImages: [
-    'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80',
-    'https://images.unsplash.com/photo-1509721437493-41fa6e2fb819?w=800&q=80',
-    'https://images.unsplash.com/photo-1554433607-66b5efe9d304?w=800&q=80'
-  ],
-  menuItems: [
-    { id: 1, name: 'The Rusty Classic', description: 'Roast beef, aged cheddar, horseradish cream', price: 14 },
-    { id: 2, name: 'Turkey Club Deluxe', description: 'Smoked turkey, bacon, avocado, lettuce, tomato', price: 13 },
-    { id: 3, name: 'Italian Stallion', description: 'Salami, capicola, provolone, giardiniera, hot peppers', price: 15 },
-    { id: 4, name: 'Veggie Supreme', description: 'Hummus, roasted vegetables, sprouts, swiss cheese', price: 12 },
-    { id: 5, name: 'BBQ Pulled Pork', description: 'Slow-cooked pork, coleslaw, pickles, BBQ sauce', price: 14 },
-    { id: 6, name: 'Grilled Cheese Melt', description: 'Three cheese blend, caramelized onions, sourdough', price: 11 }
-  ]
-}
+// A passcode compiled into the bundle keeps casual visitors out of the panel,
+// nothing more — anyone who opens the JS can read it. Real protection needs the
+// edits to go through a server that checks credentials.
+const ADMIN_PASSCODE = '9876'
 
 function App() {
   const [content, setContent] = useState(defaultContent)
@@ -31,43 +17,85 @@ function App() {
   const [isCateringOpen, setIsCateringOpen] = useState(false)
   const [adminData, setAdminData] = useState({ ...defaultContent })
   const [orderItems, setOrderItems] = useState([])
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false)
+  const [isGateOpen, setIsGateOpen] = useState(false)
+  const [passcode, setPasscode] = useState('')
+  const [gateError, setGateError] = useState('')
+  const [saveError, setSaveError] = useState('')
   
   // Load saved content from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('rustys-content')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setContent(parsed)
-        setAdminData(parsed)
-      } catch (e) {
-        console.error('Failed to load saved content')
-      }
-    }
+    const saved = loadContent()
+    setContent(saved)
+    setAdminData(saved)
   }, [])
 
-  const handleImageUpload = (e, imageType, index = null) => {
+  const handleImageUpload = async (e, imageType, index = null) => {
     const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64String = reader.result
-        if (imageType === 'hero') {
-          setAdminData({...adminData, heroImage: base64String})
-        } else if (imageType === 'support' && index !== null) {
-          const newImages = [...adminData.supportImages]
-          newImages[index] = base64String
-          setAdminData({...adminData, supportImages: newImages})
-        }
+    if (!file) return
+
+    setSaveError('')
+    try {
+      // Full-resolution photos overflow localStorage, so scale on the way in.
+      const dataUrl = await resizeImageFile(file, imageType === 'hero' ? 1800 : 1200)
+      if (imageType === 'hero') {
+        setAdminData((prev) => ({ ...prev, heroImage: dataUrl }))
+      } else if (index !== null) {
+        setAdminData((prev) => {
+          const supportImages = [...prev.supportImages]
+          supportImages[index] = dataUrl
+          return { ...prev, supportImages }
+        })
       }
-      reader.readAsDataURL(file)
+    } catch (err) {
+      setSaveError(err.message)
     }
   }
 
+  const updateCaption = (index, value) => {
+    setAdminData((prev) => {
+      const supportCaptions = [...prev.supportCaptions]
+      supportCaptions[index] = value
+      return { ...prev, supportCaptions }
+    })
+  }
+
   const handleSaveAdmin = () => {
+    // Persist first: if storage rejects the write, the panel stays open with the
+    // reason rather than reporting a save that would vanish on reload.
+    try {
+      saveContent(adminData)
+    } catch (err) {
+      setSaveError(err.message)
+      return
+    }
     setContent(adminData)
-    localStorage.setItem('rustys-content', JSON.stringify(adminData))
+    setSaveError('')
     setIsAdminOpen(false)
+  }
+
+  const handleAdminClick = () => {
+    setAdminData(content)
+    setSaveError('')
+    if (isAdminUnlocked) {
+      setIsAdminOpen(true)
+      return
+    }
+    setPasscode('')
+    setGateError('')
+    setIsGateOpen(true)
+  }
+
+  const handlePasscodeSubmit = (e) => {
+    e.preventDefault()
+    if (passcode !== ADMIN_PASSCODE) {
+      setGateError('incorrect passcode')
+      setPasscode('')
+      return
+    }
+    setIsAdminUnlocked(true)
+    setIsGateOpen(false)
+    setIsAdminOpen(true)
   }
 
   const closeCatering = useCallback(() => setIsCateringOpen(false), [])
@@ -136,9 +164,12 @@ function App() {
       <section className="support-gallery">
         <div className="support-grid">
           {content.supportImages.map((src, index) => (
-            <div key={index} className="support-item">
-              <img src={src} alt={`Support image ${index + 1}`} className="support-image" />
-            </div>
+            <figure key={index} className="support-item">
+              <img src={src} alt={content.supportCaptions[index] || `Support image ${index + 1}`} className="support-image" />
+              {content.supportCaptions[index] && (
+                <figcaption className="support-caption">{content.supportCaptions[index]}</figcaption>
+              )}
+            </figure>
           ))}
         </div>
       </section>
@@ -163,16 +194,36 @@ function App() {
 
       {/* Admin Panel Button */}
       <div className="admin-panel">
-        <button 
-          className="admin-toggle"
-          onClick={() => {
-            setAdminData(content)
-            setIsAdminOpen(true)
-          }}
-        >
+        <button className="admin-toggle" onClick={handleAdminClick}>
           admin
         </button>
       </div>
+
+      {/* Admin Passcode Gate */}
+      {isGateOpen && (
+        <div
+          className="catering-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsGateOpen(false)
+          }}
+        >
+          <form className="admin-gate" onSubmit={handlePasscodeSubmit}>
+            <label className="admin-label" htmlFor="admin-passcode">enter passcode</label>
+            <input
+              id="admin-passcode"
+              className="catering-input"
+              type="password"
+              inputMode="numeric"
+              autoComplete="off"
+              autoFocus
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+            />
+            {gateError && <p className="admin-gate-error" role="alert">{gateError}</p>}
+            <button className="catering-submit" type="submit">unlock</button>
+          </form>
+        </div>
+      )}
 
       {/* Admin Modal */}
       <div className={`admin-modal ${isAdminOpen ? 'active' : ''}`}>
@@ -243,6 +294,13 @@ function App() {
               {adminData.supportImages[index] && (
                 <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px'}} />
               )}
+              <label className="admin-label" style={{marginTop: '12px'}}>caption {index + 1}</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={adminData.supportCaptions[index]}
+                onChange={(e) => updateCaption(index, e.target.value)}
+              />
             </div>
           ))}
         </div>
@@ -293,6 +351,8 @@ function App() {
             </div>
           ))}
         </div>
+
+        {saveError && <p className="admin-save-error" role="alert">{saveError}</p>}
 
         <button className="admin-save" onClick={handleSaveAdmin}>
           save changes

@@ -864,3 +864,47 @@ h1, h2, h3, h4 {
     padding: 2.5rem 1.5rem;
   }
 }
+
+/* ==========================================================================
+   GALLERY CAPTIONS
+   ========================================================================== */
+
+.support-caption {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+  color: var(--mod-black);
+  margin-top: 1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--mod-accent);
+}
+
+/* ==========================================================================
+   ADMIN PASSCODE GATE
+   ========================================================================== */
+
+.admin-gate {
+  width: 100%;
+  max-width: 320px;
+  background: var(--mod-cream);
+  border: 2px solid var(--mod-black);
+  border-radius: 0;
+  padding: 2rem;
+  box-shadow: 8px 8px 0 var(--mod-accent);
+  animation: modRise 0.15s ease-out;
+}
+
+.admin-gate .catering-submit {
+  margin-top: 1.5rem;
+}
+
+.admin-gate-error,
+.admin-save-error {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mod-accent);
+  margin-top: 0.75rem;
+}
