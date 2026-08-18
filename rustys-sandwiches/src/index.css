@@ -908,3 +908,12 @@ h1, h2, h3, h4 {
   color: var(--mod-accent);
   margin-top: 0.75rem;
 }
+
+.admin-hint {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mod-accent);
+  margin-top: 0.5rem;
+}

@@ -1,14 +1,20 @@
 import { useState, useEffect, useCallback } from 'react'
 import LoyaltySignup from './components/LoyaltySignup'
 import CateringModal from './components/CateringModal'
-import { defaultContent, loadContent, saveContent } from './lib/siteContent'
+import {
+  defaultContent,
+  fetchContent,
+  publishContent,
+  uploadImage,
+  verifyPasscode
+} from './lib/siteContent'
 import { resizeImageFile } from './lib/imageResize'
 import './index.css'
 
-// A passcode compiled into the bundle keeps casual visitors out of the panel,
-// nothing more — anyone who opens the JS can read it. Real protection needs the
-// edits to go through a server that checks credentials.
-const ADMIN_PASSCODE = '9876'
+// The passcode is never in this bundle — it is held in the Netlify environment
+// and checked by the functions in netlify/functions. What is kept here is the
+// passcode the editor typed, in memory only, to authorise their own requests
+// until the page is reloaded.
 
 function App() {
   const [content, setContent] = useState(defaultContent)
@@ -22,12 +28,22 @@ function App() {
   const [passcode, setPasscode] = useState('')
   const [gateError, setGateError] = useState('')
   const [saveError, setSaveError] = useState('')
-  
-  // Load saved content from localStorage on mount
+  const [adminPasscode, setAdminPasscode] = useState('')
+  const [isCheckingPasscode, setIsCheckingPasscode] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [uploadingSlot, setUploadingSlot] = useState(null)
+
+  // Published content lives server-side; the defaults render until it arrives.
   useEffect(() => {
-    const saved = loadContent()
-    setContent(saved)
-    setAdminData(saved)
+    let cancelled = false
+    fetchContent().then((published) => {
+      if (cancelled) return
+      setContent(published)
+      setAdminData(published)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const handleImageUpload = async (e, imageType, index = null) => {
@@ -35,20 +51,25 @@ function App() {
     if (!file) return
 
     setSaveError('')
+    setUploadingSlot(imageType === 'hero' ? 'hero' : `support-${index}`)
     try {
-      // Full-resolution photos overflow localStorage, so scale on the way in.
-      const dataUrl = await resizeImageFile(file, imageType === 'hero' ? 1800 : 1200)
+      // Scale in the browser first, then store the file once and reference it
+      // by URL, so the content record stays small for every visitor.
+      const resized = await resizeImageFile(file, imageType === 'hero' ? 1800 : 1200)
+      const url = await uploadImage(resized, adminPasscode)
       if (imageType === 'hero') {
-        setAdminData((prev) => ({ ...prev, heroImage: dataUrl }))
+        setAdminData((prev) => ({ ...prev, heroImage: url }))
       } else if (index !== null) {
         setAdminData((prev) => {
           const supportImages = [...prev.supportImages]
-          supportImages[index] = dataUrl
+          supportImages[index] = url
           return { ...prev, supportImages }
         })
       }
     } catch (err) {
       setSaveError(err.message)
+    } finally {
+      setUploadingSlot(null)
     }
   }
 
@@ -60,18 +81,21 @@ function App() {
     })
   }
 
-  const handleSaveAdmin = () => {
-    // Persist first: if storage rejects the write, the panel stays open with the
-    // reason rather than reporting a save that would vanish on reload.
+  const handleSaveAdmin = async () => {
+    // Publish first: if the server rejects the write, the panel stays open with
+    // the reason rather than reporting a save that never happened.
+    setIsSaving(true)
     try {
-      saveContent(adminData)
+      const published = await publishContent(adminData, adminPasscode)
+      setContent(published)
+      setAdminData(published)
+      setSaveError('')
+      setIsAdminOpen(false)
     } catch (err) {
       setSaveError(err.message)
-      return
+    } finally {
+      setIsSaving(false)
     }
-    setContent(adminData)
-    setSaveError('')
-    setIsAdminOpen(false)
   }
 
   const handleAdminClick = () => {
@@ -86,16 +110,21 @@ function App() {
     setIsGateOpen(true)
   }
 
-  const handlePasscodeSubmit = (e) => {
+  const handlePasscodeSubmit = async (e) => {
     e.preventDefault()
-    if (passcode !== ADMIN_PASSCODE) {
-      setGateError('incorrect passcode')
+    setIsCheckingPasscode(true)
+    try {
+      await verifyPasscode(passcode)
+      setAdminPasscode(passcode)
+      setIsAdminUnlocked(true)
+      setIsGateOpen(false)
+      setIsAdminOpen(true)
+    } catch (err) {
+      setGateError(err.message)
       setPasscode('')
-      return
+    } finally {
+      setIsCheckingPasscode(false)
     }
-    setIsAdminUnlocked(true)
-    setIsGateOpen(false)
-    setIsAdminOpen(true)
   }
 
   const closeCatering = useCallback(() => setIsCateringOpen(false), [])
@@ -220,7 +249,9 @@ function App() {
               onChange={(e) => setPasscode(e.target.value)}
             />
             {gateError && <p className="admin-gate-error" role="alert">{gateError}</p>}
-            <button className="catering-submit" type="submit">unlock</button>
+            <button className="catering-submit" type="submit" disabled={isCheckingPasscode}>
+              {isCheckingPasscode ? 'checking' : 'unlock'}
+            </button>
           </form>
         </div>
       )}
@@ -274,6 +305,7 @@ function App() {
                 style={{flex: 1}}
               />
             </div>
+            {uploadingSlot === 'hero' && <p className="admin-hint">uploading…</p>}
             {adminData.heroImage && (
               <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px'}} />
             )}
@@ -291,6 +323,7 @@ function App() {
                 accept="image/*"
                 onChange={(e) => handleImageUpload(e, 'support', index)}
               />
+              {uploadingSlot === `support-${index}` && <p className="admin-hint">uploading…</p>}
               {adminData.supportImages[index] && (
                 <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px'}} />
               )}
@@ -354,8 +387,8 @@ function App() {
 
         {saveError && <p className="admin-save-error" role="alert">{saveError}</p>}
 
-        <button className="admin-save" onClick={handleSaveAdmin}>
-          save changes
+        <button className="admin-save" onClick={handleSaveAdmin} disabled={isSaving}>
+          {isSaving ? 'publishing…' : 'publish changes'}
         </button>
       </div>
 

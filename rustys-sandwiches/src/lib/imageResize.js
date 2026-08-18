@@ -1,7 +1,6 @@
-// Uploaded images are stored inline as base64 in localStorage, which caps out
-// around 5MB per origin — and base64 inflates a file by roughly a third. A
-// single phone photo is enough to blow that budget, so every upload is scaled
-// down and re-encoded before it ever reaches storage.
+// Uploads are scaled down in the browser before they are sent: it keeps the
+// upload quick on a phone connection, and keeps what visitors download to a
+// sensible size. The result is a JPEG Blob, posted as-is to /api/media.
 //
 // Re-encoding to JPEG drops alpha, which suits photography; a logo needing
 // transparency would want a different path.
@@ -24,7 +23,11 @@ export function resizeImageFile(file, maxDimension = 1600, quality = 0.82) {
         canvas.height = height
         canvas.getContext('2d').drawImage(img, 0, 0, width, height)
 
-        resolve(canvas.toDataURL('image/jpeg', quality))
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error('could not process that image'))),
+          'image/jpeg',
+          quality
+        )
       }
       img.src = reader.result
     }

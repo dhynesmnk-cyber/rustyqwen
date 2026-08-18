@@ -1,8 +1,7 @@
-// Site content lives in localStorage, so it is per-browser: edits made here do
-// not follow the editor to another device, and visitors always see the defaults
-// below. Publishing content to everyone would need a real backend.
-
-export const STORAGE_KEY = 'rustys-content'
+// Content is published through /api/content and stored server-side, so an edit
+// made in one browser is what every visitor sees. The defaults below are the
+// fallback for a site that has never been edited, and for when the API cannot
+// be reached (including local `vite preview`, which serves no functions).
 
 export const defaultContent = {
   title: "rusty's sandwich parlour",
@@ -29,13 +28,14 @@ export const defaultContent = {
   ]
 }
 
-// Payloads saved before a field existed are missing it, so every load is merged
-// onto the current defaults rather than trusted wholesale.
+// Content published before a field existed is missing it, so every response is
+// merged onto the current defaults rather than trusted wholesale.
 function fillFromDefaults(saved, fallback) {
   return fallback.map((value, i) => (Array.isArray(saved) && saved[i] != null ? saved[i] : value))
 }
 
-function mergeWithDefaults(saved) {
+export function mergeWithDefaults(saved) {
+  if (!saved || typeof saved !== 'object') return defaultContent
   return {
     ...defaultContent,
     ...saved,
@@ -48,28 +48,51 @@ function mergeWithDefaults(saved) {
   }
 }
 
-export function loadContent() {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (!saved) return defaultContent
+async function errorFrom(response, fallback) {
+  const body = await response.json().catch(() => null)
+  return new Error(body?.error || fallback)
+}
 
+export async function fetchContent() {
   try {
-    return mergeWithDefaults(JSON.parse(saved))
-  } catch {
-    console.error('saved site content was unreadable; falling back to defaults')
+    const response = await fetch('/api/content')
+    if (!response.ok) throw new Error(`content request failed (${response.status})`)
+    const { content } = await response.json()
+    return mergeWithDefaults(content)
+  } catch (err) {
+    // An unreachable API is not worth breaking the page over; show the defaults.
+    console.warn('using built-in content:', err.message)
     return defaultContent
   }
 }
 
-// Throws on failure so callers can report it instead of closing the panel on a
-// save that never happened.
-export function saveContent(content) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(content))
-  } catch (err) {
-    const quotaExceeded =
-      err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED'
-    throw quotaExceeded
-      ? new Error('not enough browser storage — try fewer or smaller images')
-      : err
-  }
+export async function verifyPasscode(passcode) {
+  const response = await fetch('/api/admin-verify', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${passcode}` }
+  })
+  if (response.ok) return
+  throw await errorFrom(response, 'could not check that passcode')
+}
+
+export async function publishContent(content, passcode) {
+  const response = await fetch('/api/content', {
+    method: 'PUT',
+    headers: { authorization: `Bearer ${passcode}`, 'content-type': 'application/json' },
+    body: JSON.stringify(content)
+  })
+  if (!response.ok) throw await errorFrom(response, 'could not save changes')
+  const { content: saved } = await response.json()
+  return mergeWithDefaults(saved)
+}
+
+export async function uploadImage(blob, passcode) {
+  const response = await fetch('/api/media', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${passcode}`, 'content-type': blob.type },
+    body: blob
+  })
+  if (!response.ok) throw await errorFrom(response, 'could not upload that image')
+  const { url } = await response.json()
+  return url
 }
