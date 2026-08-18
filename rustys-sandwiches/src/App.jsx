@@ -6,11 +6,11 @@ const defaultContent = {
   title: "rusty's sandwich parlour",
   tagline: "where every bite tells a story of craftsmanship and care",
   preorderEmail: "orders@rustyssandwichparlour.com",
-  heroImage: 'https://images.unsplash.com/photo-1553909489-cd47e3b4430f?w=1600&q=80',
+  heroImage: '/images/hero-sandwich.svg',
   supportImages: [
-    'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80',
-    'https://images.unsplash.com/photo-1509721437493-41fa6e2fb819?w=800&q=80',
-    'https://images.unsplash.com/photo-1554433607-66b5efe9d304?w=800&q=80'
+    '/images/ingredient-1.svg',
+    '/images/ingredient-2.svg',
+    '/images/ingredient-3.svg'
   ],
   menuItems: [
     { id: 1, name: 'The Rusty Classic', description: 'Roast beef, aged cheddar, horseradish cream', price: 14 },
@@ -99,40 +99,48 @@ function App() {
     <>
       {/* Hero Section with Image */}
       <section className="hero">
-        <div className="typewriter-title">{content.title}</div>
-        <p className="tagline">{content.tagline}</p>
+        <div className="hero-content">
+          <div className="typewriter-title">{content.title}</div>
+          <p className="tagline">{content.tagline}</p>
+          
+          <div className="hero-buttons">
+            <button className="btn btn-primary" onClick={handlePreorderClick}>Order Now</button>
+            <a href="#menu" className="btn">View Menu</a>
+          </div>
+
+          <nav className="hero-nav">
+            <div className="hero-nav-item" onClick={handlePreorderClick}>
+              <span className="hero-nav-number">01</span>
+              <span className="hero-nav-text">preorder</span>
+            </div>
+            <p className="hero-nav-subtitle">send us an email order</p>
+
+            <div className="hero-nav-item">
+              <span className="hero-nav-number">02</span>
+              <span className="hero-nav-text">catering</span>
+            </div>
+            <p className="hero-nav-subtitle">coz you got friends</p>
+
+            <div className="hero-nav-item">
+              <span className="hero-nav-number">03</span>
+              <span className="hero-nav-text">specials</span>
+            </div>
+            <p className="hero-nav-subtitle">no, you are!</p>
+          </nav>
+        </div>
         
         <div className="hero-image-container">
-          <img src={content.heroImage} alt="Rusty's Sandwich Parlour" className="hero-image" />
+          <img src={content.heroImage} alt="Rusty's Sandwich Parlour - Fresh handmade sandwiches" className="hero-image" />
         </div>
-
-        <nav className="hero-nav">
-          <div className="hero-nav-item" onClick={handlePreorderClick}>
-            <span className="hero-nav-number">01</span>
-            <span className="hero-nav-text">preorder</span>
-          </div>
-          <p className="hero-nav-subtitle">send us an email order</p>
-
-          <div className="hero-nav-item">
-            <span className="hero-nav-number">02</span>
-            <span className="hero-nav-text">catering</span>
-          </div>
-          <p className="hero-nav-subtitle">coz you got friends</p>
-
-          <div className="hero-nav-item">
-            <span className="hero-nav-number">03</span>
-            <span className="hero-nav-text">specials</span>
-          </div>
-          <p className="hero-nav-subtitle">no, you are!</p>
-        </nav>
       </section>
 
       {/* Support Gallery Section */}
-      <section className="support-gallery">
+      <section className="support-gallery" id="menu">
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: '2.5rem', marginBottom: '1rem', textAlign: 'center' }}>Our Menu</h2>
         <div className="support-grid">
           {content.supportImages.map((src, index) => (
             <div key={index} className="support-item">
-              <img src={src} alt={`Support image ${index + 1}`} className="support-image" />
+              <img src={src} alt={`Fresh ingredients ${index + 1}`} className="support-image" />
             </div>
           ))}
         </div>
@@ -146,6 +154,12 @@ function App() {
           className="footer-logo"
         />
         <p className="footer-text">{content.preorderEmail}</p>
+        <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <a href="mailto:orders@rustyssandwichparlour.com" style={{ color: 'var(--mod-cream)', fontFamily: 'Space Mono', textDecoration: 'none' }}>Email</a>
+          <a href="#location" style={{ color: 'var(--mod-cream)', fontFamily: 'Space Mono', textDecoration: 'none' }}>Location</a>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--mod-cream)', fontFamily: 'Space Mono', textDecoration: 'none' }}>Instagram</a>
+        </div>
+        <p style={{ marginTop: '2rem', color: 'var(--mod-cream)', opacity: 0.5, fontFamily: 'Space Mono', fontSize: '0.8rem' }}>© 2024 Rusty's Sandwich Parlour. All rights reserved.</p>
       </footer>
 
       {/* Admin Panel Button */}
