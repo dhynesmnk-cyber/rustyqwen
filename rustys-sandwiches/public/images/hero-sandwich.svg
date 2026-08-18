@@ -1,0 +1,9 @@
+<svg width="1600" height="900" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#FDFBF7"/>
+  <rect x="400" y="250" width="800" height="400" fill="#E8D5C4" rx="8"/>
+  <rect x="420" y="270" width="760" height="360" fill="#D4A574" rx="4"/>
+  <circle cx="600" cy="400" r="60" fill="#C44D35"/>
+  <circle cx="800" cy="450" r="80" fill="#5A8F3B"/>
+  <circle cx="1000" cy="400" r="60" fill="#E8B92E"/>
+  <text x="50%" y="50%" font-family="Arial" font-size="36" fill="#111111" text-anchor="middle" dy=".3em">Fresh Sandwich Image</text>
+</svg>

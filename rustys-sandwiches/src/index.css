@@ -8,21 +8,25 @@
 }
 
 :root {
-  --mod-black: #1a1a1a;
-  --mod-cream: #f8f5f0;
-  --mod-accent: #e85d04;
-  --mod-charcoal: #4A4541;
+  /* 60s Mod Palette: High Contrast, Elegant, Minimal */
+  --mod-cream: #FDFBF7;       /* Primary Background - warm, elegant, zero grey */
+  --mod-black: #111111;       /* Primary Text & Borders - crisp, deep, sophisticated */
+  --mod-charcoal: #3D3834;    /* Secondary Text - warm dark brown/charcoal, NEVER muddy grey */
+  --mod-accent: #D32F2F;      /* Mod Red - a sophisticated, fun pop of color for hover states/buttons */
+  --mod-mustard: #E3B23C;     /* Optional subtle highlight for active states */
+  --border-thick: 2px solid var(--mod-black); /* Signature Mod thick border */
   --border-light: #d4cfc7;
 }
 
 body {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
   background: var(--mod-cream);
   color: var(--mod-black);
   line-height: 1.6;
   overflow-x: hidden;
   font-size: 17px;
   position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Subtle paper texture */
@@ -40,20 +44,23 @@ body::before {
 
 /* Typography */
 h1, h2, h3, h4 {
-  font-weight: 400;
+  font-family: 'Syne', 'Archivo Black', sans-serif;
+  font-weight: 700;
   line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--mod-black);
 }
 
 .typewriter-title {
-  font-family: 'DM Mono', 'Courier New', monospace;
-  font-size: clamp(2rem, 5vw, 4rem);
+  font-family: 'Syne', 'Archivo Black', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
   color: var(--mod-black);
   overflow: hidden;
-  border-right: 3px solid var(--mod-black);
+  border-right: 3px solid var(--mod-accent);
   white-space: nowrap;
   margin: 0 auto;
-  letter-spacing: -2px;
-  animation: typing 3.5s steps(30, end) forwards, blink 0.75s step-end infinite;
+  letter-spacing: -0.02em;
+  animation: typing 3s steps(30) forwards, blink 0.7s step-end infinite;
   max-width: fit-content;
 }
 
@@ -64,17 +71,17 @@ h1, h2, h3, h4 {
 
 @keyframes blink {
   from, to { border-color: transparent }
-  50% { border-color: var(--mod-black) }
+  50% { border-color: var(--mod-accent) }
 }
 
 .tagline {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: clamp(1rem, 2vw, 1.5rem);
   color: var(--mod-charcoal);
   text-align: center;
   margin-top: 1rem;
   opacity: 0;
-  animation: fadeIn 1s ease forwards 3.5s;
+  animation: fadeIn 1s ease forwards 3s;
 }
 
 @keyframes fadeIn {
@@ -84,24 +91,35 @@ h1, h2, h3, h4 {
 /* Hero Section */
 .hero {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  justify-items: center;
+  padding: 6rem 4rem;
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: 6rem 0;
-  position: relative;
+  align-items: flex-start;
+  gap: 2rem;
 }
 
 .hero-image-container {
   width: 100%;
-  max-width: 1000px;
-  margin: 4rem 0;
+  max-width: 600px;
   overflow: hidden;
+  border: var(--border-thick);
 }
 
 .hero-image {
   width: 100%;
-  height: 60vh;
+  height: 500px;
   object-fit: cover;
   display: block;
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -111,38 +129,78 @@ h1, h2, h3, h4 {
   transform: scale(1.02);
 }
 
+/* Buttons - Elegant, sharp, functional */
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--mod-black);
+  border: var(--border-thick);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover {
+  background-color: var(--mod-black);
+  color: var(--mod-cream);
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: var(--mod-accent);
+  border-color: var(--mod-accent);
+  color: var(--mod-cream);
+}
+
+.btn-primary:hover {
+  background-color: var(--mod-black);
+  border-color: var(--mod-black);
+  color: var(--mod-cream);
+}
+
 /* Navigation - Clean vertical list with thin dividers */
 .hero-nav {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-top: 4rem;
-  border-top: 1px solid var(--mod-black);
-  max-width: 600px;
+  margin-top: 3rem;
+  border-top: var(--border-thick);
+  max-width: 500px;
   width: 100%;
 }
 
 .hero-nav-item {
-  border-bottom: 1px solid var(--mod-black);
-  padding: 2rem 0;
+  border-bottom: var(--border-thick);
+  padding: 1.5rem 0;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .hero-nav-item:hover {
-  background-color: rgba(232, 93, 4, 0.05);
+  background-color: rgba(211, 47, 47, 0.05);
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
 .hero-nav-link {
-  font-family: 'DM Mono', 'Courier New', monospace;
-  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
   color: var(--mod-black);
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   transition: color 0.3s ease;
 }
 
@@ -151,7 +209,7 @@ h1, h2, h3, h4 {
 }
 
 .hero-nav-number {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 0.9em;
   color: var(--mod-charcoal);
   min-width: 30px;
@@ -162,12 +220,12 @@ h1, h2, h3, h4 {
 }
 
 .hero-nav-subtitle {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 0.7em;
   color: var(--mod-charcoal);
   font-style: italic;
   margin-left: 60px;
-  margin-top: -1rem;
+  margin-top: -0.75rem;
 }
 
 /* Gallery Section */
@@ -186,11 +244,12 @@ h1, h2, h3, h4 {
 
 .support-item {
   overflow: hidden;
+  border: var(--border-thick);
 }
 
 .support-image {
   width: 100%;
-  height: 500px;
+  height: 400px;
   object-fit: cover;
   display: block;
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -204,20 +263,24 @@ h1, h2, h3, h4 {
 .footer {
   padding: 4rem 2rem;
   text-align: center;
-  border-top: 1px solid var(--mod-black);
+  border-top: var(--border-thick);
   margin-top: 6rem;
+  background-color: var(--mod-black);
+  color: var(--mod-cream);
 }
 
 .footer-logo {
   max-width: 300px;
   height: auto;
   margin-bottom: 2rem;
+  filter: brightness(0) invert(1);
 }
 
 .footer-text {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 0.9rem;
-  color: var(--mod-charcoal);
+  color: var(--mod-cream);
+  opacity: 0.7;
 }
 
 /* Admin Panel */
@@ -229,15 +292,17 @@ h1, h2, h3, h4 {
 }
 
 .admin-toggle {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   background: var(--mod-black);
   color: var(--mod-cream);
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .admin-toggle:hover {
@@ -252,7 +317,7 @@ h1, h2, h3, h4 {
   width: 400px;
   height: 100vh;
   background: var(--mod-cream);
-  border-left: 2px solid var(--mod-black);
+  border-left: var(--border-thick);
   padding: 4rem 2rem;
   overflow-y: auto;
   transition: right 0.3s ease;
@@ -268,18 +333,21 @@ h1, h2, h3, h4 {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 3rem;
+  border-bottom: var(--border-thick);
+  padding-bottom: 1rem;
 }
 
 .admin-title {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 1.8rem;
   color: var(--mod-black);
+  text-transform: uppercase;
 }
 
 .admin-close {
   background: none;
   border: none;
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 1.5rem;
   cursor: pointer;
   color: var(--mod-black);
@@ -287,13 +355,16 @@ h1, h2, h3, h4 {
 
 .admin-section {
   margin-bottom: 3rem;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 2rem;
 }
 
 .admin-section-title {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 0.9rem;
   color: var(--mod-black);
   margin-bottom: 1rem;
+  text-transform: uppercase;
 }
 
 .admin-form-group {
@@ -302,19 +373,20 @@ h1, h2, h3, h4 {
 
 .admin-label {
   display: block;
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 0.9rem;
   color: var(--mod-black);
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
 .admin-input,
 .admin-textarea {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--mod-black);
-  border-radius: 4px;
+  border: var(--border-thick);
+  border-radius: 0;
   font-size: 0.9rem;
   background: var(--mod-cream);
   color: var(--mod-black);
@@ -333,21 +405,22 @@ h1, h2, h3, h4 {
 
 .admin-menu-item {
   padding: 1.5rem;
-  border: 1px solid var(--border-light);
+  border: var(--border-thick);
   margin-bottom: 1rem;
 }
 
 .admin-save {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   background: var(--mod-black);
   color: var(--mod-cream);
   border: none;
   padding: 1rem 2rem;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   width: 100%;
   font-size: 1rem;
   transition: all 0.3s ease;
+  text-transform: uppercase;
 }
 
 .admin-save:hover {
@@ -361,7 +434,7 @@ h1, h2, h3, h4 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(26, 26, 26, 0.9);
+  background: rgba(17, 17, 17, 0.9);
   z-index: 2001;
   display: none;
   justify-content: center;
@@ -381,18 +454,19 @@ h1, h2, h3, h4 {
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  border: 2px solid var(--mod-black);
+  border: var(--border-thick);
 }
 
 .order-title {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
   color: var(--mod-black);
+  text-transform: uppercase;
 }
 
 .order-subtitle {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 0.9rem;
   color: var(--mod-charcoal);
   margin-bottom: 2rem;
@@ -403,7 +477,7 @@ h1, h2, h3, h4 {
 }
 
 .order-empty {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   color: var(--mod-charcoal);
   font-style: italic;
 }
@@ -412,30 +486,31 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--border-light);
-  font-family: 'DM Mono', 'Courier New', monospace;
+  border-bottom: var(--border-thick);
+  font-family: 'Space Mono', monospace;
 }
 
 .order-total {
   display: flex;
   justify-content: space-between;
   padding: 1.5rem 0;
-  border-top: 2px solid var(--mod-black);
+  border-top: var(--border-thick);
   margin-bottom: 2rem;
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 1.3rem;
 }
 
 .order-link {
-  font-family: 'DM Mono', 'Courier New', monospace;
+  font-family: 'Space Mono', monospace;
   display: inline-block;
   background: var(--mod-black);
   color: var(--mod-cream);
   padding: 1rem 2rem;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.3s ease;
-  border: 2px solid var(--mod-black);
+  border: var(--border-thick);
+  text-transform: uppercase;
 }
 
 .order-link:hover {
@@ -447,11 +522,28 @@ h1, h2, h3, h4 {
 /* Responsive */
 @media (max-width: 768px) {
   .hero {
-    padding: 3rem 0;
+    grid-template-columns: 1fr;
+    padding: 3rem 2rem;
+    gap: 3rem;
+  }
+  
+  .hero-content {
+    align-items: center;
+    text-align: center;
   }
   
   .hero-image {
-    height: 40vh;
+    height: 300px;
+  }
+  
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn {
+    width: 100%;
+    text-align: center;
   }
   
   .support-grid {
@@ -470,4 +562,12 @@ h1, h2, h3, h4 {
   .order-content {
     padding: 2rem;
   }
+}
+
+/* Images - Keep vibrant, no filters */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  /* DO NOT apply grayscale or sepia. Keep images vibrant and natural. */
 }
