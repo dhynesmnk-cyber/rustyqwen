@@ -100,7 +100,7 @@ function App() {
         <main>
           <section className="hero">
             <h1>Rusty's<br/>Sandwich Parlour</h1>
-            <p>Bold flavours. No fuss. Just proper sandwiches.</p>
+            <p>Bold flavours. Natural ingredients. Proper sandwiches.</p>
             <button onClick={() => setCurrentPage('menu')}>Order Now</button>
           </section>
 
@@ -125,7 +125,7 @@ function App() {
 
       {currentPage === 'checkout' && (
         <div className="checkout-page">
-          <h2 style={{color: '#FF6B00', textAlign: 'center', marginBottom: '40px'}}>Your Details</h2>
+          <h2>Your Details</h2>
           <form onSubmit={handleCheckout} className="checkout-form">
             <div className="form-group">
               <label>Name</label>
@@ -163,7 +163,7 @@ function App() {
         <div className="confirmation">
           <h2>Order Confirmed!</h2>
           <div className="order-number">#{orderNumber}</div>
-          <p style={{color: '#000', maxWidth: '500px'}}>
+          <p>
             Pick up your order at Rusty's Sandwich Parlour.<br/>
             Pay when you collect.
           </p>
@@ -172,7 +172,7 @@ function App() {
               setCurrentPage('home')
               setOrderNumber(null)
             }}
-            style={{marginTop: '30px', background: '#000', color: '#fff'}}
+            style={{marginTop: '32px', background: 'var(--orange-logo)', color: 'var(--text-light)'}}
           >
             Back to Home
           </button>
@@ -190,7 +190,7 @@ function App() {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'rgba(0,0,0,0.8)',
+              background: 'rgba(0,0,0,0.7)',
               zIndex: 1999
             }}
           />
@@ -198,29 +198,29 @@ function App() {
             <button className="close-cart" onClick={() => setIsCartOpen(false)}>×</button>
             <h2>Your Order</h2>
             {cart.length === 0 ? (
-              <p style={{color: '#666'}}>Cart is empty</p>
+              <p style={{color: 'var(--concrete-dark)'}}>Cart is empty</p>
             ) : (
               <>
                 {cart.map(item => (
                   <div key={item.id} className="cart-item">
                     <div>
-                      <strong style={{color: '#fff'}}>{item.name}</strong>
-                      <div style={{color: '#FF6B00', fontSize: '14px'}}>
+                      <strong style={{color: 'var(--text-dark)'}}>{item.name}</strong>
+                      <div style={{color: 'var(--orange-logo)', fontSize: '14px'}}>
                         ${item.price.toFixed(2)} × {item.quantity}
                       </div>
                     </div>
                     <div>
                       <button 
                         onClick={() => updateQuantity(item.id, -1)}
-                        style={{background: '#333', color: '#fff', padding: '5px 10px', marginRight: '5px'}}
+                        style={{background: 'var(--concrete-dark)', color: '#fff', padding: '8px 12px', marginRight: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace'}}
                       >-</button>
                       <button 
                         onClick={() => updateQuantity(item.id, 1)}
-                        style={{background: '#333', color: '#fff', padding: '5px 10px', marginRight: '5px'}}
+                        style={{background: 'var(--concrete-dark)', color: '#fff', padding: '8px 12px', marginRight: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace'}}
                       >+</button>
                       <button 
                         onClick={() => removeFromCart(item.id)}
-                        style={{background: '#FF6B00', color: '#000', padding: '5px 10px'}}
+                        style={{background: 'var(--orange-logo)', color: '#fff', padding: '8px 12px', border: 'none', cursor: 'pointer', fontFamily: 'monospace'}}
                       >×</button>
                     </div>
                   </div>
