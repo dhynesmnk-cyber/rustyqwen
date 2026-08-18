@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import LoyaltySignup from './components/LoyaltySignup'
+import CateringModal from './components/CateringModal'
 import './index.css'
 
 // Default content - can be updated via admin panel
@@ -26,6 +28,7 @@ function App() {
   const [content, setContent] = useState(defaultContent)
   const [isAdminOpen, setIsAdminOpen] = useState(false)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+  const [isCateringOpen, setIsCateringOpen] = useState(false)
   const [adminData, setAdminData] = useState({ ...defaultContent })
   const [orderItems, setOrderItems] = useState([])
   
@@ -66,6 +69,8 @@ function App() {
     localStorage.setItem('rustys-content', JSON.stringify(adminData))
     setIsAdminOpen(false)
   }
+
+  const closeCatering = useCallback(() => setIsCateringOpen(false), [])
 
   const handlePreorderClick = () => {
     setOrderItems([])
@@ -113,7 +118,7 @@ function App() {
           </div>
           <p className="hero-nav-subtitle">send us an email order</p>
 
-          <div className="hero-nav-item">
+          <div className="hero-nav-item" onClick={() => setIsCateringOpen(true)}>
             <span className="hero-nav-number">02</span>
             <span className="hero-nav-text">catering</span>
           </div>
@@ -138,6 +143,9 @@ function App() {
         </div>
       </section>
 
+      {/* Loyalty Sign-up */}
+      <LoyaltySignup />
+
       {/* Footer with Logo */}
       <footer className="footer">
         <img 
@@ -145,8 +153,13 @@ function App() {
           alt="Rusty's Sandwich Parlour Logo" 
           className="footer-logo"
         />
-        <p className="footer-text">{content.preorderEmail}</p>
+        <p className="footer-text">
+          <a className="mod-link" href={`mailto:${content.preorderEmail}`}>{content.preorderEmail}</a>
+        </p>
       </footer>
+
+      {/* Catering Inquiry Modal */}
+      <CateringModal isOpen={isCateringOpen} onClose={closeCatering} />
 
       {/* Admin Panel Button */}
       <div className="admin-panel">
@@ -211,7 +224,7 @@ function App() {
               />
             </div>
             {adminData.heroImage && (
-              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px', borderRadius: '4px'}} />
+              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px'}} />
             )}
           </div>
         </div>
@@ -228,7 +241,7 @@ function App() {
                 onChange={(e) => handleImageUpload(e, 'support', index)}
               />
               {adminData.supportImages[index] && (
-                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px', borderRadius: '4px'}} />
+                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px'}} />
               )}
             </div>
           ))}
