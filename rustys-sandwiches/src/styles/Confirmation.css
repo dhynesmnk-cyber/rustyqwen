@@ -1,50 +1,110 @@
 .confirmation-page {
   min-height: 100vh;
-  padding: var(--space-8) 0;
-  background-color: var(--colour-section-background);
+  background: linear-gradient(135deg, var(--colour-section-background) 0%, var(--colour-page-background) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
 }
 
 .confirmation-content {
-  max-width: 600px;
-  margin: 0 auto;
   text-align: center;
+  max-width: 500px;
+  background-color: var(--colour-card-background);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--colour-border-light);
 }
 
 .success-icon {
-  color: var(--colour-action-strong);
-  margin-bottom: var(--space-6);
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-6);
+  background: linear-gradient(135deg, var(--colour-success) 0%, #059669 100%);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: scaleIn var(--transition-slow) cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.confirmation-title {
-  font-size: 32px;
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.confirmation-content h1 {
+  font-size: var(--font-size-page-heading);
   font-weight: var(--font-weight-bold);
   color: var(--colour-text-primary);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.02em;
 }
 
-.confirmation-message {
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-  color: var(--colour-text-primary);
+.confirmation-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--colour-text-secondary);
   margin-bottom: var(--space-8);
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+  line-height: var(--line-height-relaxed);
 }
 
-.order-details-card {
-  background-color: var(--colour-cart-background);
+.order-number-container {
+  background-color: var(--colour-section-background);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+  border: 2px dashed var(--colour-border);
+}
+
+.order-number-label {
+  font-size: var(--font-size-sm);
+  color: var(--colour-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+
+.order-number {
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  color: var(--colour-action);
+  letter-spacing: -0.02em;
+  font-family: monospace;
+}
+
+.confirmation-details {
   text-align: left;
-  margin-bottom: var(--space-6);
-  border: 2px solid var(--colour-border);
+  background-color: var(--colour-section-background);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.confirmation-details h2 {
+  font-size: var(--font-size-menu-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--colour-text-primary);
+  margin-bottom: var(--space-4);
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--colour-border);
+  border-bottom: 1px solid var(--colour-border-light);
 }
 
 .detail-row:last-child {
@@ -52,120 +112,28 @@
 }
 
 .detail-label {
-  font-size: var(--font-size-body);
-  color: var(--colour-text-primary);
-  opacity: 0.9;
+  font-size: var(--font-size-sm);
+  color: var(--colour-text-secondary);
 }
 
 .detail-value {
   font-size: var(--font-size-body);
-  font-weight: var(--font-weight-bold);
-  color: var(--colour-text-primary);
-}
-
-.total-row {
-  margin-top: var(--space-2);
-  padding-top: var(--space-3);
-  border-top: 2px solid var(--colour-border);
-  font-size: var(--font-size-section-heading);
-}
-
-.total-amount {
-  color: var(--colour-action-strong);
-  font-size: 24px;
-}
-
-.pickup-info-card {
-  background-color: var(--colour-card-background);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  text-align: left;
-  margin-bottom: var(--space-6);
-  border: 2px solid var(--colour-border);
-}
-
-.info-title {
-  font-size: var(--font-size-section-heading);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-4);
-  color: var(--colour-text-primary);
-}
-
-.info-steps {
-  counter-reset: step;
-  list-style: none;
-  padding: 0;
-}
-
-.info-steps li {
-  position: relative;
-  padding-left: var(--space-8);
-  margin-bottom: var(--space-3);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-  color: var(--colour-text-primary);
-}
-
-.info-steps li::before {
-  counter-increment: step;
-  content: counter(step);
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 28px;
-  height: 28px;
-  background-color: var(--colour-action);
-  color: var(--colour-text-primary);
-  font-weight: var(--font-weight-bold);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.contact-info {
-  background-color: var(--colour-page-background);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  margin-bottom: var(--space-6);
-  border: 2px solid var(--colour-border);
-}
-
-.contact-info p {
-  margin-bottom: var(--space-3);
-  font-size: var(--font-size-body);
-  color: var(--colour-text-primary);
-}
-
-.contact-info a {
-  color: var(--colour-action-strong);
   font-weight: var(--font-weight-medium);
-  text-decoration: underline;
+  color: var(--colour-text-primary);
 }
 
-.venue-address {
-  opacity: 0.9;
-  line-height: var(--line-height-body);
-}
-
-.confirmation-actions {
-  display: flex;
-  gap: var(--space-4);
-  justify-content: center;
-  flex-wrap: wrap;
+.back-home-btn {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-semibold);
 }
 
 @media (max-width: 480px) {
-  .confirmation-title {
-    font-size: 24px;
+  .confirmation-content {
+    padding: var(--space-8);
   }
-
-  .confirmation-actions {
-    flex-direction: column;
-  }
-
-  .confirmation-actions .btn {
-    width: 100%;
+  
+  .order-number {
+    font-size: 36px;
   }
 }
