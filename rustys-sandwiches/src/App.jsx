@@ -43,6 +43,24 @@ function App() {
     }
   }, [])
 
+  const handleImageUpload = (e, imageType, index = null) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result
+        if (imageType === 'hero') {
+          setAdminData({...adminData, heroImage: base64String})
+        } else if (imageType === 'support' && index !== null) {
+          const newImages = [...adminData.supportImages]
+          newImages[index] = base64String
+          setAdminData({...adminData, supportImages: newImages})
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSaveAdmin = () => {
     setContent(adminData)
     localStorage.setItem('rustys-content', JSON.stringify(adminData))
@@ -220,13 +238,18 @@ function App() {
           </div>
 
           <div className="admin-form-group">
-            <label className="admin-label">hero image url</label>
-            <input 
-              type="text" 
-              className="admin-input"
-              value={adminData.heroImage}
-              onChange={(e) => setAdminData({...adminData, heroImage: e.target.value})}
-            />
+            <label className="admin-label">hero image</label>
+            <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, 'hero')}
+                style={{flex: 1}}
+              />
+            </div>
+            {adminData.heroImage && (
+              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px', borderRadius: '8px'}} />
+            )}
           </div>
         </div>
 
@@ -235,17 +258,15 @@ function App() {
           
           {[0, 1, 2].map((index) => (
             <div key={index} className="admin-form-group">
-              <label className="admin-label">image {index + 1} url</label>
+              <label className="admin-label">image {index + 1}</label>
               <input 
-                type="text" 
-                className="admin-input"
-                value={adminData.supportImages[index] || ''}
-                onChange={(e) => {
-                  const newImages = [...adminData.supportImages]
-                  newImages[index] = e.target.value
-                  setAdminData({...adminData, supportImages: newImages})
-                }}
+                type="file" 
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, 'support', index)}
               />
+              {adminData.supportImages[index] && (
+                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px', borderRadius: '8px'}} />
+              )}
             </div>
           ))}
         </div>
