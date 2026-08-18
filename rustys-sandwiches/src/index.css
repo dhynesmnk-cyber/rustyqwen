@@ -81,14 +81,48 @@ body::before {
   opacity: 0.6;
 }
 
-/* Hero Section */
+/* Hero Section with Image */
 .hero {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 60px;
+  align-items: center;
   position: relative;
+  padding: 0;
+}
+
+.hero-image-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7) grayscale(20%) sepia(10%);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  color: #fff;
+  padding: 0 60px;
 }
 
 .typewriter-container {
@@ -101,10 +135,11 @@ body::before {
   font-weight: 400;
   letter-spacing: 0.02em;
   overflow: hidden;
-  border-right: 2px solid var(--text-primary);
+  border-right: 2px solid #fff;
   white-space: nowrap;
   width: 0;
   animation: typing 3.5s steps(40, end) forwards, blink 0.75s step-end infinite;
+  color: #fff;
 }
 
 @keyframes typing {
@@ -114,14 +149,14 @@ body::before {
 
 @keyframes blink {
   from, to { border-color: transparent }
-  50% { border-color: var(--text-primary) }
+  50% { border-color: #fff }
 }
 
 .tagline {
   font-family: 'Georgia', serif;
   font-size: clamp(18px, 2.5vw, 28px);
   font-style: italic;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
   opacity: 0;
   animation: fadeIn 1s ease 3.5s forwards;
@@ -133,11 +168,12 @@ body::before {
 
 /* Navigation Links Below Hero */
 .hero-nav {
-  padding: 60px;
+  padding: 100px 60px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   max-width: 400px;
+  margin: 0 auto;
 }
 
 .hero-nav-item {
@@ -145,7 +181,6 @@ body::before {
   align-items: baseline;
   gap: 16px;
   cursor: pointer;
-  group: hover;
 }
 
 .hero-nav-number {
@@ -175,41 +210,152 @@ body::before {
   margin-top: -12px;
 }
 
-/* Gallery Section */
-.gallery {
+/* Menu Section */
+.menu-section {
   padding: 100px 60px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.gallery-grid {
+.section-title {
+  font-family: 'Georgia', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 60px;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.menu-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 40px;
 }
 
-.gallery-item {
+.menu-item {
+  padding: 30px;
+  background: transparent;
+  border: 1px solid var(--soft-beige);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  border-color: var(--accent-rust);
+  background: rgba(184, 92, 56, 0.02);
+}
+
+.menu-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.menu-item-name {
+  font-family: 'Georgia', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.menu-item-price {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  color: var(--accent-rust);
+}
+
+.menu-item-description {
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.add-btn {
+  background: none;
+  border: 1px solid var(--soft-beige);
+  padding: 10px 24px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--muted-gray);
+}
+
+.add-btn:hover {
+  border-color: var(--accent-rust);
+  color: var(--accent-rust);
+}
+
+.add-btn.selected {
+  background: var(--accent-rust);
+  border-color: var(--accent-rust);
+  color: #fff;
+}
+
+/* Support Gallery Section */
+.support-gallery {
+  padding: 100px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.support-item {
   position: relative;
   overflow: hidden;
 }
 
-.gallery-item:nth-child(2) {
-  margin-top: 80px;
+.support-item:nth-child(2) {
+  margin-top: 60px;
 }
 
-.gallery-item:nth-child(3) {
-  margin-top: 40px;
+.support-item:nth-child(3) {
+  margin-top: 30px;
 }
 
-.gallery-image {
+.support-image {
   width: 100%;
-  height: 500px;
+  height: 400px;
   object-fit: cover;
   filter: grayscale(20%) sepia(10%);
   transition: filter 0.5s ease, transform 0.5s ease;
 }
 
-.gallery-item:hover .gallery-image {
+.support-item:hover .support-image {
   filter: grayscale(0%) sepia(0%);
   transform: scale(1.02);
+}
+
+/* Footer */
+.footer {
+  padding: 80px 60px;
+  text-align: center;
+  background: var(--cream);
+  border-top: 1px solid var(--soft-beige);
+}
+
+.footer-logo {
+  max-width: 300px;
+  height: auto;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.footer-text {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--muted-gray);
+  text-transform: lowercase;
 }
 
 /* Admin Panel */
@@ -327,6 +473,13 @@ body::before {
   resize: vertical;
 }
 
+.admin-menu-item {
+  padding: 24px;
+  background: var(--cream);
+  border: 1px solid var(--soft-beige);
+  margin-bottom: 24px;
+}
+
 .admin-save {
   background: var(--charcoal);
   color: var(--warm-white);
@@ -344,8 +497,8 @@ body::before {
   background: var(--accent-rust);
 }
 
-/* Email Order Modal */
-.email-modal {
+/* Order Modal */
+.order-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -358,33 +511,71 @@ body::before {
   display: none;
 }
 
-.email-modal.active {
+.order-modal.active {
   display: block;
 }
 
-.email-content {
+.order-content {
   max-width: 600px;
   margin: 0 auto;
+  position: relative;
 }
 
-.email-title {
+.order-title {
   font-family: 'Georgia', serif;
   font-size: 36px;
   font-weight: 400;
-  margin-bottom: 40px;
+  margin-bottom: 12px;
   color: var(--text-primary);
 }
 
-.email-body {
+.order-subtitle {
   font-family: 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 2;
-  color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--muted-gray);
   margin-bottom: 40px;
-  white-space: pre-wrap;
 }
 
-.email-link {
+.order-items-list {
+  margin-bottom: 30px;
+}
+
+.order-empty {
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  color: var(--muted-gray);
+  font-style: italic;
+}
+
+.order-selected-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--soft-beige);
+  font-family: 'Georgia', serif;
+}
+
+.order-item-name {
+  color: var(--text-primary);
+}
+
+.order-item-price {
+  font-family: 'Courier New', monospace;
+  color: var(--accent-rust);
+}
+
+.order-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 0;
+  border-top: 2px solid var(--charcoal);
+  margin-bottom: 40px;
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.order-link {
   display: inline-block;
   background: var(--charcoal);
   color: var(--warm-white);
@@ -397,19 +588,23 @@ body::before {
   transition: background 0.3s ease;
 }
 
-.email-link:hover {
+.order-link:hover {
   background: var(--accent-rust);
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .gallery-grid {
+  .support-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .gallery-item:nth-child(2),
-  .gallery-item:nth-child(3) {
+  .support-item:nth-child(2),
+  .support-item:nth-child(3) {
     margin-top: 0;
+  }
+  
+  .menu-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -419,19 +614,31 @@ body::before {
   }
   
   .hero {
+    padding: 0;
+  }
+  
+  .hero-content {
     padding: 0 30px;
   }
   
-  .gallery {
+  .hero-nav {
     padding: 60px 30px;
   }
   
-  .gallery-grid {
+  .menu-section {
+    padding: 60px 30px;
+  }
+  
+  .support-gallery {
+    padding: 60px 30px;
+  }
+  
+  .support-grid {
     grid-template-columns: 1fr;
   }
   
-  .hero-nav {
-    padding: 30px;
+  .footer {
+    padding: 60px 30px;
   }
   
   .admin-panel {
@@ -440,7 +647,7 @@ body::before {
   }
   
   .admin-modal,
-  .email-modal {
+  .order-modal {
     padding: 30px;
   }
 }
