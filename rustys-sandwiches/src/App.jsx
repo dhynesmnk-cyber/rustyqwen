@@ -1,71 +1,133 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import LoyaltySignup from './components/LoyaltySignup'
+import CateringModal from './components/CateringModal'
+import {
+  defaultContent,
+  fetchContent,
+  publishContent,
+  uploadImage,
+  verifyPasscode
+} from './lib/siteContent'
+import { resizeImageFile } from './lib/imageResize'
 import './index.css'
 
-// Default content - can be updated via admin panel
-const defaultContent = {
-  title: "rusty's sandwich parlour",
-  tagline: "where every bite tells a story of craftsmanship and care",
-  preorderEmail: "orders@rustyssandwichparlour.com",
-  heroImage: 'https://images.unsplash.com/photo-1553909489-cd47e3b4430f?w=1600&q=80',
-  supportImages: [
-    'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80',
-    'https://images.unsplash.com/photo-1509721437493-41fa6e2fb819?w=800&q=80',
-    'https://images.unsplash.com/photo-1554433607-66b5efe9d304?w=800&q=80'
-  ],
-  menuItems: [
-    { id: 1, name: 'The Rusty Classic', description: 'Roast beef, aged cheddar, horseradish cream', price: 14 },
-    { id: 2, name: 'Turkey Club Deluxe', description: 'Smoked turkey, bacon, avocado, lettuce, tomato', price: 13 },
-    { id: 3, name: 'Italian Stallion', description: 'Salami, capicola, provolone, giardiniera, hot peppers', price: 15 },
-    { id: 4, name: 'Veggie Supreme', description: 'Hummus, roasted vegetables, sprouts, swiss cheese', price: 12 },
-    { id: 5, name: 'BBQ Pulled Pork', description: 'Slow-cooked pork, coleslaw, pickles, BBQ sauce', price: 14 },
-    { id: 6, name: 'Grilled Cheese Melt', description: 'Three cheese blend, caramelized onions, sourdough', price: 11 }
-  ]
-}
+// The passcode is never in this bundle — it is held in the Netlify environment
+// and checked by the functions in netlify/functions. What is kept here is the
+// passcode the editor typed, in memory only, to authorise their own requests
+// until the page is reloaded.
 
 function App() {
   const [content, setContent] = useState(defaultContent)
   const [isAdminOpen, setIsAdminOpen] = useState(false)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+  const [isCateringOpen, setIsCateringOpen] = useState(false)
   const [adminData, setAdminData] = useState({ ...defaultContent })
   const [orderItems, setOrderItems] = useState([])
-  
-  // Load saved content from localStorage on mount
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false)
+  const [isGateOpen, setIsGateOpen] = useState(false)
+  const [passcode, setPasscode] = useState('')
+  const [gateError, setGateError] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [adminPasscode, setAdminPasscode] = useState('')
+  const [isCheckingPasscode, setIsCheckingPasscode] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [uploadingSlot, setUploadingSlot] = useState(null)
+
+  // Published content lives server-side; the defaults render until it arrives.
   useEffect(() => {
-    const saved = localStorage.getItem('rustys-content')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setContent(parsed)
-        setAdminData(parsed)
-      } catch (e) {
-        console.error('Failed to load saved content')
-      }
+    let cancelled = false
+    fetchContent().then((published) => {
+      if (cancelled) return
+      setContent(published)
+      setAdminData(published)
+    })
+    return () => {
+      cancelled = true
     }
   }, [])
 
-  const handleImageUpload = (e, imageType, index = null) => {
+  const handleImageUpload = async (e, imageType, index = null) => {
     const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64String = reader.result
-        if (imageType === 'hero') {
-          setAdminData({...adminData, heroImage: base64String})
-        } else if (imageType === 'support' && index !== null) {
-          const newImages = [...adminData.supportImages]
-          newImages[index] = base64String
-          setAdminData({...adminData, supportImages: newImages})
-        }
+    if (!file) return
+
+    setSaveError('')
+    setUploadingSlot(imageType === 'hero' ? 'hero' : `support-${index}`)
+    try {
+      // Scale in the browser first, then store the file once and reference it
+      // by URL, so the content record stays small for every visitor.
+      const resized = await resizeImageFile(file, imageType === 'hero' ? 1800 : 1200)
+      const url = await uploadImage(resized, adminPasscode)
+      if (imageType === 'hero') {
+        setAdminData((prev) => ({ ...prev, heroImage: url }))
+      } else if (index !== null) {
+        setAdminData((prev) => {
+          const supportImages = [...prev.supportImages]
+          supportImages[index] = url
+          return { ...prev, supportImages }
+        })
       }
-      reader.readAsDataURL(file)
+    } catch (err) {
+      setSaveError(err.message)
+    } finally {
+      setUploadingSlot(null)
     }
   }
 
-  const handleSaveAdmin = () => {
-    setContent(adminData)
-    localStorage.setItem('rustys-content', JSON.stringify(adminData))
-    setIsAdminOpen(false)
+  const updateCaption = (index, value) => {
+    setAdminData((prev) => {
+      const supportCaptions = [...prev.supportCaptions]
+      supportCaptions[index] = value
+      return { ...prev, supportCaptions }
+    })
   }
+
+  const handleSaveAdmin = async () => {
+    // Publish first: if the server rejects the write, the panel stays open with
+    // the reason rather than reporting a save that never happened.
+    setIsSaving(true)
+    try {
+      const published = await publishContent(adminData, adminPasscode)
+      setContent(published)
+      setAdminData(published)
+      setSaveError('')
+      setIsAdminOpen(false)
+    } catch (err) {
+      setSaveError(err.message)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleAdminClick = () => {
+    setAdminData(content)
+    setSaveError('')
+    if (isAdminUnlocked) {
+      setIsAdminOpen(true)
+      return
+    }
+    setPasscode('')
+    setGateError('')
+    setIsGateOpen(true)
+  }
+
+  const handlePasscodeSubmit = async (e) => {
+    e.preventDefault()
+    setIsCheckingPasscode(true)
+    try {
+      await verifyPasscode(passcode)
+      setAdminPasscode(passcode)
+      setIsAdminUnlocked(true)
+      setIsGateOpen(false)
+      setIsAdminOpen(true)
+    } catch (err) {
+      setGateError(err.message)
+      setPasscode('')
+    } finally {
+      setIsCheckingPasscode(false)
+    }
+  }
+
+  const closeCatering = useCallback(() => setIsCateringOpen(false), [])
 
   const handlePreorderClick = () => {
     setOrderItems([])
@@ -113,7 +175,7 @@ function App() {
           </div>
           <p className="hero-nav-subtitle">send us an email order</p>
 
-          <div className="hero-nav-item">
+          <div className="hero-nav-item" onClick={() => setIsCateringOpen(true)}>
             <span className="hero-nav-number">02</span>
             <span className="hero-nav-text">catering</span>
           </div>
@@ -131,12 +193,18 @@ function App() {
       <section className="support-gallery">
         <div className="support-grid">
           {content.supportImages.map((src, index) => (
-            <div key={index} className="support-item">
-              <img src={src} alt={`Support image ${index + 1}`} className="support-image" />
-            </div>
+            <figure key={index} className="support-item">
+              <img src={src} alt={content.supportCaptions[index] || `Support image ${index + 1}`} className="support-image" />
+              {content.supportCaptions[index] && (
+                <figcaption className="support-caption">{content.supportCaptions[index]}</figcaption>
+              )}
+            </figure>
           ))}
         </div>
       </section>
+
+      {/* Loyalty Sign-up */}
+      <LoyaltySignup />
 
       {/* Footer with Logo */}
       <footer className="footer">
@@ -145,21 +213,48 @@ function App() {
           alt="Rusty's Sandwich Parlour Logo" 
           className="footer-logo"
         />
-        <p className="footer-text">{content.preorderEmail}</p>
+        <p className="footer-text">
+          <a className="mod-link" href={`mailto:${content.preorderEmail}`}>{content.preorderEmail}</a>
+        </p>
       </footer>
+
+      {/* Catering Inquiry Modal */}
+      <CateringModal isOpen={isCateringOpen} onClose={closeCatering} />
 
       {/* Admin Panel Button */}
       <div className="admin-panel">
-        <button 
-          className="admin-toggle"
-          onClick={() => {
-            setAdminData(content)
-            setIsAdminOpen(true)
-          }}
-        >
+        <button className="admin-toggle" onClick={handleAdminClick}>
           admin
         </button>
       </div>
+
+      {/* Admin Passcode Gate */}
+      {isGateOpen && (
+        <div
+          className="catering-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsGateOpen(false)
+          }}
+        >
+          <form className="admin-gate" onSubmit={handlePasscodeSubmit}>
+            <label className="admin-label" htmlFor="admin-passcode">enter passcode</label>
+            <input
+              id="admin-passcode"
+              className="catering-input"
+              type="password"
+              inputMode="numeric"
+              autoComplete="off"
+              autoFocus
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+            />
+            {gateError && <p className="admin-gate-error" role="alert">{gateError}</p>}
+            <button className="catering-submit" type="submit" disabled={isCheckingPasscode}>
+              {isCheckingPasscode ? 'checking' : 'unlock'}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Admin Modal */}
       <div className={`admin-modal ${isAdminOpen ? 'active' : ''}`}>
@@ -210,8 +305,9 @@ function App() {
                 style={{flex: 1}}
               />
             </div>
+            {uploadingSlot === 'hero' && <p className="admin-hint">uploading…</p>}
             {adminData.heroImage && (
-              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px', borderRadius: '4px'}} />
+              <img src={adminData.heroImage} alt="Hero preview" style={{width: '100%', height: '200px', objectFit: 'cover', marginTop: '12px'}} />
             )}
           </div>
         </div>
@@ -227,9 +323,17 @@ function App() {
                 accept="image/*"
                 onChange={(e) => handleImageUpload(e, 'support', index)}
               />
+              {uploadingSlot === `support-${index}` && <p className="admin-hint">uploading…</p>}
               {adminData.supportImages[index] && (
-                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px', borderRadius: '4px'}} />
+                <img src={adminData.supportImages[index]} alt={`Support ${index + 1}`} style={{width: '100%', height: '150px', objectFit: 'cover', marginTop: '12px'}} />
               )}
+              <label className="admin-label" style={{marginTop: '12px'}}>caption {index + 1}</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={adminData.supportCaptions[index]}
+                onChange={(e) => updateCaption(index, e.target.value)}
+              />
             </div>
           ))}
         </div>
@@ -281,8 +385,10 @@ function App() {
           ))}
         </div>
 
-        <button className="admin-save" onClick={handleSaveAdmin}>
-          save changes
+        {saveError && <p className="admin-save-error" role="alert">{saveError}</p>}
+
+        <button className="admin-save" onClick={handleSaveAdmin} disabled={isSaving}>
+          {isSaving ? 'publishing…' : 'publish changes'}
         </button>
       </div>
 

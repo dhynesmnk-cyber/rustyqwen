@@ -8,6 +8,29 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!--
+      Netlify discovers forms by parsing the HTML it serves at deploy time, and the
+      real forms are rendered by React at runtime. These hidden copies are what
+      register "loyalty-signup" and "catering-inquiry" with Netlify Forms; keep the
+      field names here in sync with src/components/*.jsx.
+    -->
+    <form name="loyalty-signup" netlify netlify-honeypot="bot-field" hidden>
+      <input type="email" name="email" />
+      <input name="bot-field" />
+    </form>
+    <form name="catering-inquiry" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="date" name="date" />
+      <select name="headcount">
+        <option value="10-20">10 - 20</option>
+        <option value="20-50">20 - 50</option>
+        <option value="50+">50 +</option>
+      </select>
+      <textarea name="message"></textarea>
+      <input name="bot-field" />
+    </form>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
