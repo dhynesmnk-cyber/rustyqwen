@@ -1,104 +1,106 @@
 import { useCart } from '../hooks/useCart';
-import { formatPrice } from '../lib/square';
-import '../styles/CartDrawer.css';
+import './CartDrawer.css';
 
 export default function CartDrawer() {
-  const { cartItems, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
-
-  if (!isCartOpen) return null;
+  const { 
+    cartItems, 
+    isCartOpen, 
+    setIsCartOpen, 
+    removeFromCart, 
+    updateQuantity,
+    getCartTotal,
+    clearCart
+  } = useCart();
 
   const total = getCartTotal();
 
   return (
-    <div className="cart-overlay" onClick={() => setIsCartOpen(false)}>
-      <div className="cart-drawer" onClick={(e) => e.stopPropagation()}>
-        <div className="cart-header">
+    <>
+      {isCartOpen && (
+        <div className="cart-overlay" onClick={() => setIsCartOpen(false)} />
+      )}
+      
+      <aside className={`cart-drawer ${isCartOpen ? 'open' : ''}`}>
+        <header className="cart-header">
           <h2>Your Order</h2>
           <button 
-            className="close-button" 
+            className="close-cart"
             onClick={() => setIsCartOpen(false)}
             aria-label="Close cart"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M18 6L6 18M6 6l12 12"/>
             </svg>
           </button>
-        </div>
+        </header>
 
-        <div className="cart-items">
+        <div className="cart-content">
           {cartItems.length === 0 ? (
-            <p className="cart-empty">Your cart is empty</p>
+            <div className="empty-cart">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              <p>Your cart is empty</p>
+              <span>Add some delicious items to get started</span>
+            </div>
           ) : (
-            cartItems.map((item, index) => (
-              <div key={`${item.id}-${index}`} className="cart-item">
-                <div className="cart-item-details">
-                  <h3 className="cart-item-name">{item.name}</h3>
-                  {item.modifiers && item.modifiers.length > 0 && (
-                    <ul className="cart-item-modifiers">
-                      {item.modifiers.map((mod, i) => (
-                        <li key={i} className="modifier-item">+ {mod.name}</li>
-                      ))}
-                    </ul>
-                  )}
-                  <div className="cart-item-price">
-                    {formatPrice((item.price + (item.modifiers || []).reduce((sum, m) => sum + (m.price || 0), 0)) * 100)}
-                  </div>
+            <>
+              <ul className="cart-items">
+                {cartItems.map((item) => (
+                  <li key={`${item.id}-${item.variationId}`} className="cart-item">
+                    <div className="cart-item-image">
+                      <img src={item.image} alt={item.name} loading="lazy" />
+                    </div>
+                    <div className="cart-item-details">
+                      <h3 className="cart-item-name">{item.name}</h3>
+                      <span className="cart-item-price">${item.price.toFixed(2)}</span>
+                    </div>
+                    <div className="cart-item-actions">
+                      <div className="quantity-controls">
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.variationId, -1)}
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </button>
+                        <span className="quantity">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.variationId, 1)}
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button 
+                        className="remove-item"
+                        onClick={() => removeFromCart(item.id, item.variationId)}
+                        aria-label={`Remove ${item.name} from cart`}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="cart-footer">
+                <div className="cart-total">
+                  <span>Total</span>
+                  <span className="total-amount">${total.toFixed(2)}</span>
                 </div>
-                <div className="cart-item-actions">
-                  <div className="quantity-controls">
-                    <button 
-                      className="qty-btn" 
-                      onClick={() => updateQuantity(index, item.quantity - 1)}
-                      aria-label="Decrease quantity"
-                    >
-                      -
-                    </button>
-                    <span className="qty-value">{item.quantity}</span>
-                    <button 
-                      className="qty-btn" 
-                      onClick={() => updateQuantity(index, item.quantity + 1)}
-                      aria-label="Increase quantity"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <button 
-                    className="remove-btn" 
-                    onClick={() => removeFromCart(index)}
-                    aria-label="Remove item"
-                  >
-                    Remove
-                  </button>
-                </div>
+                <button className="checkout-btn btn btn-primary btn-large">
+                  Proceed to Checkout
+                </button>
+                <p className="checkout-note">Pay when you collect your order</p>
               </div>
-            ))
+            </>
           )}
         </div>
-
-        {cartItems.length > 0 && (
-          <div className="cart-footer">
-            <div className="cart-total">
-              <span>Total:</span>
-              <span className="total-amount">{formatPrice(total * 100)}</span>
-            </div>
-            <div className="cart-actions">
-              <button 
-                className="btn btn-secondary clear-cart" 
-                onClick={clearCart}
-              >
-                Clear Cart
-              </button>
-              <a href="/checkout" className="btn btn-primary checkout-btn">
-                Checkout
-              </a>
-            </div>
-            <p className="payment-note">
-              Payment required at venue when collecting your order.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }
